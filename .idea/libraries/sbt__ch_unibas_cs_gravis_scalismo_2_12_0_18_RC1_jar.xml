@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="sbt: ch.unibas.cs.gravis:scalismo_2.12:0.18-RC1:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/dl.bintray.com/unibas-gravis/maven/ch/unibas/cs/gravis/scalismo_2.12/0.18-RC1/scalismo_2.12-0.18-RC1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/dl.bintray.com/unibas-gravis/maven/ch/unibas/cs/gravis/scalismo_2.12/0.18-RC1/scalismo_2.12-0.18-RC1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/dl.bintray.com/unibas-gravis/maven/ch/unibas/cs/gravis/scalismo_2.12/0.18-RC1/scalismo_2.12-0.18-RC1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

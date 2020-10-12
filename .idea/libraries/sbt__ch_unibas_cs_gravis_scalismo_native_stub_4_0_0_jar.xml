@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: ch.unibas.cs.gravis:scalismo-native-stub:4.0.0:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/dl.bintray.com/unibas-gravis/maven/ch/unibas/cs/gravis/scalismo-native-stub/4.0.0/scalismo-native-stub-4.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/dl.bintray.com/unibas-gravis/maven/ch/unibas/cs/gravis/scalismo-native-stub/4.0.0/scalismo-native-stub-4.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

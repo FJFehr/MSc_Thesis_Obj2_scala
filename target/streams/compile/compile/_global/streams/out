@@ -1,0 +1,4 @@
+[0m[[0m[33mwarn[0m] [0m[0m/media/fabio/Storage/UCT/Thesis/Coding/Shape-Modeling-FAUST/src/main/scala/alignFAUSTData.scala:79:57: method rigid3DLandmarkRegistration in object LandmarkRegistration is deprecated (since 0.15): Calling rigid3DLandmarkRegistration without a center is deprecated. Please specify the center[0m
+[0m[[0m[33mwarn[0m] [0m[0m  val bestTransform = registration.LandmarkRegistration.rigid3DLandmarkRegistration(newMeshLandmarks, refMeshLandmarks)[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                                        ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
