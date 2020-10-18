@@ -68,52 +68,16 @@ object alignFAUSTData extends App {
   val meshes :IndexedSeq[TriangleMesh[_3D]] = (0 until sortedMeshFiles.size).map(i => {
     println(sortedMeshFiles(i))
     val mesh = MeshIO.readMesh(sortedMeshFiles(i)).get
-    scaleMesh(mesh, 100)
+    scaleMesh(mesh, 1) // Only change the scale to visualise in Scala
   }).toIndexedSeq
-
-  // Read in two meshes
-//  val reference = meshes(0)
-//  val refMeshView = ui.show(faustGroup, reference, "reference")
-//  val newMesh = meshes(1)
-//  val newMeshView = ui.show(faustGroup, newMesh, "newMesh")
-
-  // I have looked at the Ground Truth (GT) vertices supplied and they have more then the points?
-  // (items in GT = 176386,176387? not sure how that relates to the points 6890)
-  // I will assume that the correspondences are decent and move on. Uniformly sample
-
-  // get a 10th of the data to be my correspondence points
-//  val ptIds = (0 until reference.pointSet.numberOfPoints/10).map(i => PointId(i*10)).toSeq
-  //println(ptIds)
-
-  // Get landmarks for reference
-//  val refMeshLandmarks =  ptIds.map(pId => {
-//    Landmark(s"lm-${pId.id}", reference.pointSet.point(pId))
-//  }
-//  )
-
-  // Get landmarks for new mesh
-//  val newMeshLandmarks =  ptIds.map(pId => {
-//    Landmark(s"lm-${pId.id}", newMesh.pointSet.point(pId))
-//  }
-//  )
-
-  // Apply procrustes using the following: NB its from - to. from the new mesh to the reference mesh
-  // This learns the alignment transformation from a few corresponding points
-//  val bestTransform = registration.LandmarkRegistration.rigid3DLandmarkRegistration(newMeshLandmarks, refMeshLandmarks)
-
-  // This shows that the alignment is actually worse... hmm
-//  val newAlignedMesh = newMesh.transform(bestTransform)
-//  val newAlignedMeshView = ui.show(faustGroup, newAlignedMesh, "newAlignedMesh")
-
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Set reference
   val reference = meshes.head // the first dataset dataset(0)
 
   // Alignment:
   // Grab some points on the reference
-  val pointIds = (1200 until 1300 by 1).toSeq ++ (3300 until 3400 by 1).toSeq // torso ++ left foot
+//  val pointIds = (1200 until 1300 by 1).toSeq ++ (3300 until 3400 by 1).toSeq // torso ++ left foot
+  val pointIds = (0 until reference.pointSet.numberOfPoints by 10).toSeq // uniform sample GPA
   val refLandmarks = pointIds.map{id => Landmark(s"L_$id", reference.pointSet.point(PointId(id))) }
 
   // View alignment:
