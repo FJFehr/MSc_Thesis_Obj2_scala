@@ -1,12 +1,16 @@
 import java.io._
+
 import com.opencsv.CSVWriter
 import scalismo.common.{Field, NearestNeighborInterpolator, RealSpace, UnstructuredPointsDomain}
 import scalismo.geometry.{EuclideanVector, Point, _3D}
+import scalismo.io.MeshIO
 import scalismo.kernels.{DiagonalKernel, GaussianKernel, PDKernel}
 import scalismo.mesh.{MeshMetrics, TriangleMesh, TriangleMesh3D}
 import scalismo.numerics.FixedPointsUniformMeshSampler3D
 import scalismo.statisticalmodel.{GaussianProcess, LowRankGaussianProcess, StatisticalMeshModel}
 import scalismo.statisticalmodel.dataset.{DataCollection, ModelMetrics}
+import scalismo.utils.Random
+
 import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -144,12 +148,12 @@ object experimentFunctions {
 
       // Gather metrics //////////////////////////////////////////////////////////////////////////////////////////////
       // Generalisation
-      val modelGeneralization = ModelMetrics.generalization(model,testingdc).get
+      val modelGeneralization = generalization(model,testingdc).get
       modelGeneralizationStore += fmt.format(modelGeneralization).toString // saving
       println("The models average generalisation is the following: " + modelGeneralization)
 
       // Generalisation PC1
-      val modelGeneralizationPC1 = ModelMetrics.generalization(modelPC1,testingdc).get
+      val modelGeneralizationPC1 = generalization(modelPC1,testingdc).get
       modelGeneralizationStorePC1 += fmt.format(modelGeneralizationPC1).toString // saving
       println("The PC1 models average generalisation is the following: " + modelGeneralizationPC1)
 
@@ -162,11 +166,11 @@ object experimentFunctions {
       println("The PC1 models Hausdorff generalisation is the following: " + modelGeneralizationHausdorffPC1)
 
       // Specificity
-      val modelSpecificity = ModelMetrics.specificity(model,testMeshes,20) // This proceedure is sampled n times
+      val modelSpecificity = specificity(model,testMeshes,20) // This proceedure is sampled n times
       modelSpecificityStore += fmt.format(modelSpecificity).toString
       println("The models specificity is the following: " + modelSpecificity)
 
-      val modelSpecificityPC1 = ModelMetrics.specificity(modelPC1,testMeshes,20) // This proceedure is sampled n times
+      val modelSpecificityPC1 = specificity(modelPC1,testMeshes,20) // This proceedure is sampled n times
       modelSpecificityStorePC1 += fmt.format(modelSpecificityPC1).toString
       println("The PC1 models specificity is the following: " + modelSpecificityPC1)
 
@@ -334,6 +338,28 @@ object experimentFunctions {
 
   }
 
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Distance metrics //////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  def correspondenceAverageDistance(m1: TriangleMesh[_3D], m2: TriangleMesh[_3D]): Double = {
+    require(m1.pointSet.numberOfPoints == m2.pointSet.numberOfPoints)
+
+    val dists = (m1.pointSet.points.toIndexedSeq zip m2.pointSet.points.toIndexedSeq).map {
+      case (m1P, m2P) => (m1P - m2P).norm
+    }
+    dists.sum / m1.pointSet.numberOfPoints
+  }
+
+  def correspondenceHausdorffDistance(m1: TriangleMesh[_3D], m2: TriangleMesh[_3D]): Double = {
+
+    require(m1.pointSet.numberOfPoints == m2.pointSet.numberOfPoints)
+
+    val dists = (m1.pointSet.points.toIndexedSeq zip m2.pointSet.points.toIndexedSeq).map {
+      case (m1P, m2P) => (m1P - m2P).norm
+    }
+    dists.max
+  }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Generalisation //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -345,13 +371,26 @@ object experimentFunctions {
   // notice also that generalisation averages all the errors. In Luthis paper we dont haver but rather get all the point
   // errors and then plot in a box plot.
 
-  def generalizationHausdorff(pcaModel: StatisticalMeshModel, dc: DataCollection): Try[Double] = {
+  def generalization(pcaModel: StatisticalMeshModel, dc: DataCollection): Try[Double] = {
 
     if (pcaModel.referenceMesh == dc.reference) Success {
       dc.dataItems.par.map { item =>
         val mesh = dc.reference.transform(item.transformation)
         val projection = pcaModel.project(mesh)
-        MeshMetrics.hausdorffDistance(projection, mesh)
+        correspondenceAverageDistance(projection, mesh)
+      }.sum / dc.size.toDouble
+    } else Failure(new Exception("pca model and test data collection must have the same reference"))
+  }
+
+  def generalizationHausdorff(pcaModel: StatisticalMeshModel, dc: DataCollection): Try[Double] = {
+
+    if (pcaModel.referenceMesh == dc.reference) Success {
+      dc.dataItems.par.map { item =>
+        val mesh = dc.reference.transform(item.transformation)
+        MeshIO.writeMesh(mesh, new File("currentdMesh1.stl"))
+        val projection = pcaModel.project(mesh)
+        MeshIO.writeMesh(projection, new File("projectedMesh1.stl"))
+        correspondenceHausdorffDistance(projection, mesh)
       }.sum / dc.size.toDouble
     } else Failure(new Exception("pca model and test data collection must have the same reference"))
   }
@@ -361,6 +400,17 @@ object experimentFunctions {
   // Specificity /////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  def specificity(pcaModel: StatisticalMeshModel, data: Iterable[TriangleMesh[_3D]], nbSamples: Int)(
+    implicit rng: Random
+  ): Double = {
+
+    (0 until nbSamples).par.map { _ =>
+      val sample = pcaModel.sample
+      data.map { m =>
+        correspondenceAverageDistance(m, sample)
+      }.min
+    }.sum * (1.0 / nbSamples)
+  }
 
   //  val modelSpecificity = ModelMetrics.specificity(model,meshes,100) // This proceedure is sampled 20 times
   //  println("The models specificity is the following: " + modelSpecificity)

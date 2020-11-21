@@ -11,8 +11,8 @@ object femur_GPMM extends App {
   implicit val rng = scalismo.utils.Random(42)
 
   // Load the data  //////////////////////////////////////////////////////////////////////////////////////////////////
-  val meshFiles = getListOfFiles("meshes/femurs/")
-  val extractor = "femurCorrespondenceDecimate([\\d]+).stl$".r
+  val meshFiles = getListOfFiles("meshes/femurs/processedFemurs/")
+  val extractor = "processedFemur([\\d]+).stl$".r
 
   // Sorts the files into a numbered order
   val sortedMeshFiles = meshFiles.sortWith {(l, r) =>
